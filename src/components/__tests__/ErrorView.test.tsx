@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react-native"
+import React from "react"
 import ErrorView from "../ErrorView"
 
 describe("ErrorView", () => {
@@ -25,7 +26,7 @@ describe("ErrorView", () => {
     render(<ErrorView message={errorMessage} onRetry={mockOnRetry} />)
 
     const retryButton = screen.getByText("Try Again")
-    fireEvent.press(retryButton)
+    fireEvent.press(retryButton.parent!)
 
     expect(mockOnRetry).toHaveBeenCalledTimes(1)
   })
@@ -34,5 +35,15 @@ describe("ErrorView", () => {
     render(<ErrorView message={errorMessage} onRetry={mockOnRetry} />)
 
     expect(screen.getByText("⚠️")).toBeTruthy()
+  })
+
+  it("should render all elements correctly", () => {
+    const { getByText } = render(
+      <ErrorView message={errorMessage} onRetry={mockOnRetry} />,
+    )
+
+    expect(getByText("⚠️")).toBeTruthy()
+    expect(getByText(errorMessage)).toBeTruthy()
+    expect(getByText("Try Again")).toBeTruthy()
   })
 })

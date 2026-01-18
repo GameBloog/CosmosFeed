@@ -63,41 +63,6 @@ pnpm test:coverage
 - Sem necessidade de autenticação
 - Retorna artigos com título, resumo, imagem e link
 
-## 🏗️ Estrutura do Projeto
-
-```
-cosmos-feed/
-├── src/
-│   ├── components/
-│   │   ├── __tests__/
-│   │   │   ├── ArticleCard.test.tsx
-│   │   │   ├── LoadingIndicator.test.tsx
-│   │   │   └── ErrorView.test.tsx
-│   │   ├── ArticleCard.tsx
-│   │   ├── LoadingIndicator.tsx
-│   │   └── ErrorView.tsx
-│   ├── screens/
-│   │   ├── __tests__/
-│   │   │   └── HomeScreen.test.tsx
-│   │   ├── HomeScreen.tsx
-│   │   └── DetailsScreen.tsx
-│   ├── services/
-│   │   ├── __tests__/
-│   │   │   ├── api.test.ts
-│   │   │   ├── storage.test.ts
-│   │   │   └── share.test.ts
-│   │   ├── api.ts
-│   │   ├── storage.ts
-│   │   └── share.ts
-│   └── styles/
-│       └── theme.ts
-├── App.tsx
-├── app.json
-├── jest.config.js
-├── package.json
-└── tsconfig.json
-```
-
 ## ⚙️ Como Rodar o Projeto
 
 ### Pré-requisitos
@@ -110,7 +75,7 @@ cosmos-feed/
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/seu-usuario/cosmos-feed.git
+git clone https://github.com/GameBloog/CosmosFeed
 cd cosmos-feed
 ```
 

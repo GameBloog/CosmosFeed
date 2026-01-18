@@ -21,6 +21,17 @@ describe("Storage Service", () => {
     updated_at: "2024-01-01T00:00:00Z",
   }
 
+  const mockArticle2: Article = {
+    id: 2,
+    title: "Test Article 2",
+    url: "https://test.com/2",
+    image_url: "https://test.com/image2.jpg",
+    news_site: "Test Site 2",
+    summary: "Test summary 2",
+    published_at: "2024-01-02T00:00:00Z",
+    updated_at: "2024-01-02T00:00:00Z",
+  }
+
   beforeEach(() => {
     jest.clearAllMocks()
   })
@@ -48,10 +59,22 @@ describe("Storage Service", () => {
       expect(AsyncStorage.setItem).not.toHaveBeenCalled()
     })
 
-    it("should throw error when save fails", async () => {
-      ;(AsyncStorage.getItem as jest.Mock).mockRejectedValueOnce(
-        new Error("Storage error"),
+    it("should add article to existing saved articles", async () => {
+      ;(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(
+        JSON.stringify([mockArticle]),
       )
+      ;(AsyncStorage.setItem as jest.Mock).mockResolvedValueOnce(undefined)
+
+      await saveArticle(mockArticle2)
+
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+        "@cosmos_feed:saved_articles",
+        JSON.stringify([mockArticle, mockArticle2]),
+      )
+    })
+
+    it("should throw error when setItem fails", async () => {
+      ;(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(null)
       ;(AsyncStorage.setItem as jest.Mock).mockRejectedValueOnce(
         new Error("Storage error"),
       )
@@ -77,9 +100,23 @@ describe("Storage Service", () => {
       )
     })
 
-    it("should throw error when remove fails", async () => {
-      ;(AsyncStorage.getItem as jest.Mock).mockRejectedValueOnce(
-        new Error("Storage error"),
+    it("should remove only the specified article", async () => {
+      ;(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(
+        JSON.stringify([mockArticle, mockArticle2]),
+      )
+      ;(AsyncStorage.setItem as jest.Mock).mockResolvedValueOnce(undefined)
+
+      await removeArticle(1)
+
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+        "@cosmos_feed:saved_articles",
+        JSON.stringify([mockArticle2]),
+      )
+    })
+
+    it("should throw error when setItem fails", async () => {
+      ;(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(
+        JSON.stringify([mockArticle]),
       )
       ;(AsyncStorage.setItem as jest.Mock).mockRejectedValueOnce(
         new Error("Storage error"),
@@ -106,6 +143,16 @@ describe("Storage Service", () => {
       const result = await getSavedArticles()
 
       expect(result).toEqual([])
+    })
+
+    it("should return multiple saved articles", async () => {
+      ;(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(
+        JSON.stringify([mockArticle, mockArticle2]),
+      )
+
+      const result = await getSavedArticles()
+
+      expect(result).toEqual([mockArticle, mockArticle2])
     })
 
     it("should return empty array on error", async () => {
@@ -136,6 +183,14 @@ describe("Storage Service", () => {
       )
 
       const result = await isArticleSaved(2)
+
+      expect(result).toBe(false)
+    })
+
+    it("should return false when no articles are saved", async () => {
+      ;(AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(null)
+
+      const result = await isArticleSaved(1)
 
       expect(result).toBe(false)
     })

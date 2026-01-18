@@ -2,10 +2,20 @@ import { Share } from "react-native"
 import { shareArticle } from "../share"
 import { Article } from "../api"
 
-jest.mock("react-native/Libraries/Share/Share", () => ({
-  share: jest.fn(),
-  sharedAction: "sharedAction",
-  dismissedAction: "dismissedAction",
+jest.mock("react-native", () => ({
+  Share: {
+    share: jest.fn(),
+    sharedAction: "sharedAction",
+    dismissedAction: "dismissedAction",
+  },
+  Platform: {
+    OS: "android",
+    select: (obj: { [key: string]: any }) => obj.android ?? obj.ios,
+  },
+  Linking: {
+    openURL: jest.fn(),
+    canOpenURL: jest.fn().mockResolvedValue(true),
+  },
 }))
 
 describe("Share Service", () => {
@@ -43,12 +53,53 @@ describe("Share Service", () => {
       )
     })
 
+    it("should include article summary in share message", async () => {
+      ;(Share.share as jest.Mock).mockResolvedValueOnce({
+        action: Share.sharedAction,
+      })
+
+      await shareArticle(mockArticle)
+
+      expect(Share.share).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining(mockArticle.summary),
+        }),
+        expect.any(Object),
+      )
+    })
+
+    it("should include article URL in share message", async () => {
+      ;(Share.share as jest.Mock).mockResolvedValueOnce({
+        action: Share.sharedAction,
+      })
+
+      await shareArticle(mockArticle)
+
+      expect(Share.share).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining(mockArticle.url),
+        }),
+        expect.any(Object),
+      )
+    })
+
     it("should handle share dismissal", async () => {
       ;(Share.share as jest.Mock).mockResolvedValueOnce({
         action: Share.dismissedAction,
       })
 
-      await shareArticle(mockArticle)
+      await expect(shareArticle(mockArticle)).resolves.not.toThrow()
+
+      expect(Share.share).toHaveBeenCalled()
+    })
+
+    it("should handle share with activity type", async () => {
+      ;(Share.share as jest.Mock).mockResolvedValueOnce({
+        action: Share.sharedAction,
+        activityType: "com.apple.UIKit.activity.Message",
+      })
+
+      await expect(shareArticle(mockArticle)).resolves.not.toThrow()
 
       expect(Share.share).toHaveBeenCalled()
     })
@@ -60,6 +111,21 @@ describe("Share Service", () => {
 
       await expect(shareArticle(mockArticle)).rejects.toThrow(
         "Failed to share article",
+      )
+    })
+
+    it("should call share with correct dialog title", async () => {
+      ;(Share.share as jest.Mock).mockResolvedValueOnce({
+        action: Share.sharedAction,
+      })
+
+      await shareArticle(mockArticle)
+
+      expect(Share.share).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          dialogTitle: `Share ${mockArticle.title}`,
+        }),
       )
     })
   })

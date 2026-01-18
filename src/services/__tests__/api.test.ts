@@ -78,5 +78,38 @@ describe("API Service", () => {
         { params: { limit: 10, offset: 20 } },
       )
     })
+
+    it("should handle empty results", async () => {
+      mockedAxios.get.mockResolvedValueOnce({
+        data: {
+          count: 0,
+          next: null,
+          previous: null,
+          results: [],
+        },
+      })
+
+      const result = await fetchArticles()
+
+      expect(result).toEqual([])
+    })
+
+    it("should use default parameters when not provided", async () => {
+      mockedAxios.get.mockResolvedValueOnce({
+        data: {
+          count: 0,
+          next: null,
+          previous: null,
+          results: [],
+        },
+      })
+
+      await fetchArticles()
+
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        "https://api.spaceflightnewsapi.net/v4/articles/",
+        { params: { limit: 20, offset: 0 } },
+      )
+    })
   })
 })

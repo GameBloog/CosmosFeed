@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react-native"
+import React from "react"
 import LoadingIndicator from "../LoadingIndicator"
 
 describe("LoadingIndicator", () => {
@@ -13,5 +14,12 @@ describe("LoadingIndicator", () => {
 
     const activityIndicator = getByTestId("activity-indicator")
     expect(activityIndicator).toBeTruthy()
+  })
+
+  it("should render all elements correctly", () => {
+    const { getByText, getByTestId } = render(<LoadingIndicator />)
+
+    expect(getByText("Loading articles...")).toBeTruthy()
+    expect(getByTestId("activity-indicator")).toBeTruthy()
   })
 })
