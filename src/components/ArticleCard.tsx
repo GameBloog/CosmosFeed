@@ -7,6 +7,8 @@ import {
   Alert,
 } from "react-native"
 import { useEffect, useState } from "react"
+import { useFocusEffect } from "@react-navigation/native"
+import { useCallback } from "react"
 import { Article } from "../services/api"
 import { isArticleSaved, removeArticle, saveArticle } from "../services/storage"
 import { shareArticle } from "../services/share"
@@ -15,14 +17,25 @@ import { theme } from "../styles/theme"
 interface ArticleCardProps {
   article: Article
   onPress: () => void
+  onSaveToggle?: () => void
 }
 
-export default function ArticleCard({ article, onPress }: ArticleCardProps) {
+export default function ArticleCard({
+  article,
+  onPress,
+  onSaveToggle,
+}: ArticleCardProps) {
   const [isSaved, setIsSaved] = useState(false)
 
   useEffect(() => {
     checkIfSaved()
   }, [])
+
+  useFocusEffect(
+    useCallback(() => {
+      checkIfSaved()
+    }, [article.id]),
+  )
 
   const checkIfSaved = async () => {
     const saved = await isArticleSaved(article.id)
@@ -40,6 +53,10 @@ export default function ArticleCard({ article, onPress }: ArticleCardProps) {
         setIsSaved(true)
         Alert.alert("Success", "Article saved successfully")
       }
+
+      if (onSaveToggle) {
+        onSaveToggle()
+      }
     } catch (error) {
       Alert.alert("Error", "Failed to save article")
     }
@@ -49,7 +66,7 @@ export default function ArticleCard({ article, onPress }: ArticleCardProps) {
     try {
       await shareArticle(article)
     } catch (error) {
-      Alert.alert('Error', 'Failed to share article')
+      Alert.alert("Error", "Failed to share article")
     }
   }
 

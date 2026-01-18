@@ -38,7 +38,7 @@ describe("API Service", () => {
       expect(result).toEqual(mockArticles)
       expect(mockedAxios.get).toHaveBeenCalledWith(
         "https://api.spaceflightnewsapi.net/v4/articles/",
-        { params: { limit: 20 } },
+        { params: { limit: 20, offset: 0 } },
       )
     })
 
@@ -48,7 +48,7 @@ describe("API Service", () => {
       await expect(fetchArticles()).rejects.toThrow("Failed to fetch articles")
     })
 
-    it("should fetch articles with custom limit", async () => {
+    it("should fetch articles with custom limit and offset", async () => {
       const mockArticles = [
         {
           id: 1,
@@ -71,11 +71,11 @@ describe("API Service", () => {
         },
       })
 
-      await fetchArticles(10)
+      await fetchArticles(10, 20)
 
       expect(mockedAxios.get).toHaveBeenCalledWith(
         "https://api.spaceflightnewsapi.net/v4/articles/",
-        { params: { limit: 10 } },
+        { params: { limit: 10, offset: 20 } },
       )
     })
   })

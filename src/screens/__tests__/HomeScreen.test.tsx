@@ -11,9 +11,18 @@ import { Article } from "../../services/api"
 jest.mock("../../services/api")
 jest.mock("../../services/storage")
 
+// Mock do React Navigation
+jest.mock("@react-navigation/native", () => ({
+  ...jest.requireActual("@react-navigation/native"),
+  useNavigation: () => ({
+    navigate: mockNavigation.navigate,
+  }),
+  useFocusEffect: jest.fn((callback) => callback()),
+}))
+
 const mockNavigation = {
   navigate: jest.fn(),
-} as any
+}
 
 describe("HomeScreen", () => {
   const mockArticles: Article[] = [
@@ -48,7 +57,7 @@ describe("HomeScreen", () => {
       () => new Promise(() => {}),
     )
 
-    render(<HomeScreen navigation={mockNavigation} />)
+    render(<HomeScreen />)
 
     expect(screen.getByText("Loading articles...")).toBeTruthy()
   })
@@ -56,7 +65,7 @@ describe("HomeScreen", () => {
   it("should display articles after successful fetch", async () => {
     ;(api.fetchArticles as jest.Mock).mockResolvedValue(mockArticles)
 
-    render(<HomeScreen navigation={mockNavigation} />)
+    render(<HomeScreen />)
 
     await waitFor(() => {
       expect(screen.getByText("Article 1")).toBeTruthy()
@@ -69,7 +78,7 @@ describe("HomeScreen", () => {
       new Error("Network error"),
     )
 
-    render(<HomeScreen navigation={mockNavigation} />)
+    render(<HomeScreen />)
 
     await waitFor(() => {
       expect(
@@ -84,7 +93,7 @@ describe("HomeScreen", () => {
       .mockRejectedValueOnce(new Error("Network error"))
       .mockResolvedValueOnce(mockArticles)
 
-    render(<HomeScreen navigation={mockNavigation} />)
+    render(<HomeScreen />)
 
     await waitFor(() => {
       expect(screen.getByText("Try Again")).toBeTruthy()
@@ -102,7 +111,7 @@ describe("HomeScreen", () => {
   it("should navigate to details when article is pressed", async () => {
     ;(api.fetchArticles as jest.Mock).mockResolvedValue(mockArticles)
 
-    render(<HomeScreen navigation={mockNavigation} />)
+    render(<HomeScreen />)
 
     await waitFor(() => {
       expect(screen.getByText("Article 1")).toBeTruthy()
@@ -126,11 +135,52 @@ describe("HomeScreen", () => {
   it("should render correct number of articles", async () => {
     ;(api.fetchArticles as jest.Mock).mockResolvedValue(mockArticles)
 
-    const { getAllByText } = render(<HomeScreen navigation={mockNavigation} />)
+    const { getAllByText } = render(<HomeScreen />)
 
     await waitFor(() => {
       const articles = getAllByText(/Article/)
       expect(articles.length).toBe(2)
+    })
+  })
+
+  it("should load more articles on scroll", async () => {
+    const moreArticles: Article[] = [
+      {
+        id: 3,
+        title: "Article 3",
+        url: "https://test.com/3",
+        image_url: "https://test.com/image3.jpg",
+        news_site: "Site 3",
+        summary: "Summary 3",
+        published_at: "2024-01-03T00:00:00Z",
+        updated_at: "2024-01-03T00:00:00Z",
+      },
+    ]
+
+    ;(api.fetchArticles as jest.Mock)
+      .mockResolvedValueOnce(mockArticles)
+      .mockResolvedValueOnce(moreArticles)
+
+    const { getByTestId } = render(<HomeScreen />)
+
+    await waitFor(() => {
+      expect(screen.getByText("Article 1")).toBeTruthy()
+    })
+
+    // Simula scroll até o final
+    const flatList = getByTestId ? getByTestId("article-list") : null
+    if (flatList) {
+      fireEvent.scroll(flatList, {
+        nativeEvent: {
+          contentOffset: { y: 500 },
+          contentSize: { height: 1000 },
+          layoutMeasurement: { height: 500 },
+        },
+      })
+    }
+
+    await waitFor(() => {
+      expect(api.fetchArticles).toHaveBeenCalledTimes(2)
     })
   })
 })

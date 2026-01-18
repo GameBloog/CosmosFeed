@@ -1,8 +1,12 @@
-import * as Sharing from "expo-sharing"
+import { Share } from "react-native"
 import { shareArticle } from "../share"
 import { Article } from "../api"
 
-jest.mock("expo-sharing")
+jest.mock("react-native/Libraries/Share/Share", () => ({
+  share: jest.fn(),
+  sharedAction: "sharedAction",
+  dismissedAction: "dismissedAction",
+}))
 
 describe("Share Service", () => {
   const mockArticle: Article = {
@@ -22,26 +26,35 @@ describe("Share Service", () => {
 
   describe("shareArticle", () => {
     it("should share article successfully", async () => {
-      ;(Sharing.isAvailableAsync as jest.Mock).mockResolvedValueOnce(true)
-      ;(Sharing.shareAsync as jest.Mock).mockResolvedValueOnce(undefined)
+      ;(Share.share as jest.Mock).mockResolvedValueOnce({
+        action: Share.sharedAction,
+      })
 
       await shareArticle(mockArticle)
 
-      const expectedMessage = `${mockArticle.title}\n\n${mockArticle.summary}\n\nRead more: ${mockArticle.url}`
-      expect(Sharing.shareAsync).toHaveBeenCalledWith(expectedMessage)
-    })
-
-    it("should throw error when sharing is not available", async () => {
-      ;(Sharing.isAvailableAsync as jest.Mock).mockResolvedValueOnce(false)
-
-      await expect(shareArticle(mockArticle)).rejects.toThrow(
-        "Failed to share article",
+      expect(Share.share).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining(mockArticle.title),
+          title: mockArticle.title,
+        }),
+        expect.objectContaining({
+          subject: mockArticle.title,
+        }),
       )
     })
 
+    it("should handle share dismissal", async () => {
+      ;(Share.share as jest.Mock).mockResolvedValueOnce({
+        action: Share.dismissedAction,
+      })
+
+      await shareArticle(mockArticle)
+
+      expect(Share.share).toHaveBeenCalled()
+    })
+
     it("should throw error when share fails", async () => {
-      ;(Sharing.isAvailableAsync as jest.Mock).mockResolvedValueOnce(true)
-      ;(Sharing.shareAsync as jest.Mock).mockRejectedValueOnce(
+      ;(Share.share as jest.Mock).mockRejectedValueOnce(
         new Error("Share error"),
       )
 

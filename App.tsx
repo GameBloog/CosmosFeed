@@ -1,13 +1,16 @@
 import "react-native-gesture-handler"
 import { NavigationContainer } from "@react-navigation/native"
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { StatusBar } from "expo-status-bar"
+import { Text } from "react-native"
 import HomeScreen from "./src/screens/HomeScreen"
+import FavoritesScreen from "./src/screens/FavoritesScreen"
 import DetailsScreen from "./src/screens/DetailsScreen"
 import { theme } from "./src/styles/theme"
 
 export type RootStackParamList = {
-  Home: undefined
+  HomeTabs: undefined
   Details: {
     id: number
     title: string
@@ -18,7 +21,55 @@ export type RootStackParamList = {
   }
 }
 
+export type TabParamList = {
+  Feed: undefined
+  Favorites: undefined
+}
+
 const Stack = createNativeStackNavigator<RootStackParamList>()
+const Tab = createBottomTabNavigator<TabParamList>()
+
+function HomeTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.colors.background.primary,
+        },
+        headerTintColor: theme.colors.text.primary,
+        headerTitleStyle: {
+          fontWeight: theme.typography.weights.semibold,
+        },
+        tabBarStyle: {
+          backgroundColor: theme.colors.background.secondary,
+          borderTopColor: theme.colors.background.tertiary,
+          borderTopWidth: 1,
+        },
+        tabBarActiveTintColor: theme.colors.accent.primary,
+        tabBarInactiveTintColor: theme.colors.text.tertiary,
+      }}
+    >
+      <Tab.Screen
+        name="Feed"
+        component={HomeScreen}
+        options={{
+          title: "Cosmos Feed",
+          tabBarLabel: "Feed",
+          tabBarIcon: ({ color }) => <Text style={{ fontSize: 20 }}>🌌</Text>,
+        }}
+      />
+      <Tab.Screen
+        name="Favorites"
+        component={FavoritesScreen}
+        options={{
+          title: "Saved Articles",
+          tabBarLabel: "Saved",
+          tabBarIcon: ({ color }) => <Text style={{ fontSize: 20 }}>⭐</Text>,
+        }}
+      />
+    </Tab.Navigator>
+  )
+}
 
 export default function App() {
   return (
@@ -36,9 +87,9 @@ export default function App() {
         }}
       >
         <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ title: "Cosmos Feed" }}
+          name="HomeTabs"
+          component={HomeTabs}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="Details"

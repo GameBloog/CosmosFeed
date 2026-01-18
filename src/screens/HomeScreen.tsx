@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react"
-import { FlatList, StyleSheet, View } from "react-native"
+import { useState, useEffect, useCallback } from "react"
+import { FlatList, StyleSheet, View, ActivityIndicator } from "react-native"
+import { useNavigation } from "@react-navigation/native"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { RootStackParamList } from "../../App"
 import { Article, fetchArticles } from "../services/api"
@@ -8,34 +9,66 @@ import LoadingIndicator from "../components/LoadingIndicator"
 import ErrorView from "../components/ErrorView"
 import { theme } from "../styles/theme"
 
-type HomeScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "Home"
->
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>
 
-interface HomeScreenProps {
-  navigation: HomeScreenNavigationProp
-}
-
-export default function HomeScreen({ navigation }: HomeScreenProps) {
+export default function HomeScreen() {
+  const navigation = useNavigation<NavigationProp>()
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [offset, setOffset] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+
+  const LIMIT = 20
 
   useEffect(() => {
     loadArticles()
   }, [])
 
-  const loadArticles = async () => {
+  const loadArticles = async (isRefresh = false) => {
     try {
-      setLoading(true)
+      if (isRefresh) {
+        setRefreshing(true)
+        setOffset(0)
+        setHasMore(true)
+      } else {
+        setLoading(true)
+      }
+
       setError(null)
-      const data = await fetchArticles()
+      const data = await fetchArticles(LIMIT, 0)
       setArticles(data)
+      setOffset(LIMIT)
+      setHasMore(data.length === LIMIT)
     } catch (err) {
       setError("Failed to load articles. Please try again.")
     } finally {
       setLoading(false)
+      setRefreshing(false)
+    }
+  }
+
+  const loadMoreArticles = async () => {
+    if (loadingMore || !hasMore) return
+
+    try {
+      setLoadingMore(true)
+      const data = await fetchArticles(LIMIT, offset)
+
+      if (data.length < LIMIT) {
+        setHasMore(false)
+      }
+
+      if (data.length > 0) {
+        setArticles((prev) => [...prev, ...data])
+        setOffset((prev) => prev + LIMIT)
+      }
+    } catch (err) {
+      console.error("Error loading more articles:", err)
+    } finally {
+      setLoadingMore(false)
     }
   }
 
@@ -50,12 +83,26 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     })
   }
 
+  const handleRefresh = () => {
+    loadArticles(true)
+  }
+
+  const renderFooter = () => {
+    if (!loadingMore) return null
+
+    return (
+      <View style={styles.footer}>
+        <ActivityIndicator size="small" color={theme.colors.text.tertiary} />
+      </View>
+    )
+  }
+
   if (loading) {
     return <LoadingIndicator />
   }
 
   if (error) {
-    return <ErrorView message={error} onRetry={loadArticles} />
+    return <ErrorView message={error} onRetry={() => loadArticles()} />
   }
 
   return (
@@ -71,6 +118,11 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        onEndReached={loadMoreArticles}
+        onEndReachedThreshold={0.5}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
+        ListFooterComponent={renderFooter}
       />
     </View>
   )
@@ -83,5 +135,9 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingVertical: theme.spacing.sm,
+  },
+  footer: {
+    paddingVertical: theme.spacing.lg,
+    alignItems: "center",
   },
 })

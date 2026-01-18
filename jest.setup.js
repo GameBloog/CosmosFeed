@@ -8,7 +8,8 @@ jest.mock("@react-native-async-storage/async-storage", () => ({
   getAllKeys: jest.fn(() => Promise.resolve([])),
 }))
 
-jest.mock("expo-sharing", () => ({
-  isAvailableAsync: jest.fn(() => Promise.resolve(true)),
-  shareAsync: jest.fn(() => Promise.resolve()),
+jest.mock("react-native/Libraries/Share/Share", () => ({
+  share: jest.fn(() => Promise.resolve({ action: "sharedAction" })),
+  sharedAction: "sharedAction",
+  dismissedAction: "dismissedAction",
 }))

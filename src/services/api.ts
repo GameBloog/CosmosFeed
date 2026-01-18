@@ -20,10 +20,16 @@ interface ApiResponse {
   results: Article[]
 }
 
-export const fetchArticles = async (limit: number = 20): Promise<Article[]> => {
+export const fetchArticles = async (
+  limit: number = 20,
+  offset: number = 0,
+): Promise<Article[]> => {
   try {
     const response = await axios.get<ApiResponse>(`${API_BASE_URL}/articles/`, {
-      params: { limit },
+      params: {
+        limit,
+        offset,
+      },
     })
 
     return response.data.results

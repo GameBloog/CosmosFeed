@@ -10,6 +10,12 @@ import * as storage from "../../services/storage"
 import * as share from "../../services/share"
 import { Article } from "../../services/api"
 
+// Mock do React Navigation
+jest.mock("@react-navigation/native", () => ({
+  ...jest.requireActual("@react-navigation/native"),
+  useFocusEffect: jest.fn((callback) => callback()),
+}))
+
 jest.mock("../../services/storage")
 jest.mock("../../services/share")
 jest.spyOn(Alert, "alert")
@@ -148,6 +154,26 @@ describe("ArticleCard", () => {
         "Error",
         "Failed to share article",
       )
+    })
+  })
+
+  it("should call onSaveToggle callback when provided", async () => {
+    const mockOnSaveToggle = jest.fn()
+    ;(storage.saveArticle as jest.Mock).mockResolvedValue(undefined)
+
+    const { getByText } = render(
+      <ArticleCard
+        article={mockArticle}
+        onPress={mockOnPress}
+        onSaveToggle={mockOnSaveToggle}
+      />,
+    )
+
+    const saveButton = getByText("☆")
+    fireEvent.press(saveButton)
+
+    await waitFor(() => {
+      expect(mockOnSaveToggle).toHaveBeenCalled()
     })
   })
 })
