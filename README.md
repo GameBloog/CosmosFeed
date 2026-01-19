@@ -38,10 +38,6 @@ O Cosmos Feed permite que usuários acompanhem as últimas notícias sobre explo
 
 O projeto inclui testes unitários abrangentes usando Jest e React Native Testing Library.
 
-### Cobertura de Testes
-- **Services**: API, Storage e Share
-- **Components**: ArticleCard, LoadingIndicator, ErrorView
-- **Screens**: HomeScreen
 
 ### Executar Testes
 
@@ -130,8 +126,10 @@ O design segue uma estética espacial minimalista com:
 
 ## 👨‍💻 Autor
 
+Pedro Gimenez
 Desenvolvido como parte de um desafio técnico para vaga de Desenvolvedor Mobile React Native.
 
 ## 📄 Licença
 
 Este projeto foi desenvolvido para fins educacionais e de avaliação técnica.
+
