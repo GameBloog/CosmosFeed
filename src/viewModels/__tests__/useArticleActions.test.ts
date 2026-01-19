@@ -60,6 +60,8 @@ describe("useArticleActions", () => {
       expect(result.current.isSaved).toBe(false)
     })
 
+    ;(storage.isArticleSaved as jest.Mock).mockResolvedValue(true)
+
     await act(async () => {
       await result.current.handleSave()
     })
@@ -82,6 +84,8 @@ describe("useArticleActions", () => {
     await waitFor(() => {
       expect(result.current.isSaved).toBe(true)
     })
+
+    ;(storage.isArticleSaved as jest.Mock).mockResolvedValue(false)
 
     await act(async () => {
       await result.current.handleSave()

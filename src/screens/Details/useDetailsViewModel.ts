@@ -70,14 +70,16 @@ export const useDetailsViewModel = (params: UseDetailsViewModelParams) => {
     Linking.openURL(params.url)
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  }
+ const formatDate = (dateString: string) => {
+   const date = new Date(dateString)
+
+   return date.toLocaleDateString("en-US", {
+     year: "numeric",
+     month: "long",
+     day: "numeric",
+     timeZone: "UTC",
+   })
+ }
 
   useEffect(() => {
     checkIfSaved()

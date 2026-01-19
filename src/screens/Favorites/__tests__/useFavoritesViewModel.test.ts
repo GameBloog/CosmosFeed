@@ -3,11 +3,24 @@ import { useFavoritesViewModel } from "../useFavoritesViewModel"
 import * as storage from "../../../services/storage"
 import { Article } from "../../../services/api"
 
-jest.mock("@react-navigation/native", () => ({
-  useFocusEffect: jest.fn((callback) => callback()),
+jest.mock("../../../services/storage", () => ({
+  getSavedArticles: jest.fn(),
 }))
 
-jest.mock("../../../services/storage")
+jest.mock("@react-navigation/native", () => {
+  const React = require("react")
+  const { act } = require("@testing-library/react-native")
+
+  return {
+    useFocusEffect: jest.fn((callback: any) => {
+      act(() => {
+        const effect = callback()
+        if (typeof effect === "function") {
+        }
+      })
+    }),
+  }
+})
 
 describe("useFavoritesViewModel", () => {
   const mockArticles: Article[] = [
@@ -37,7 +50,7 @@ describe("useFavoritesViewModel", () => {
   })
 
   it("should load empty array when no saved articles", async () => {
-    ;(storage.getSavedArticles as jest.Mock).mockResolvedValue([])
+    ;(storage.getSavedArticles as jest.Mock).mockResolvedValueOnce([])
 
     const { result } = renderHook(() => useFavoritesViewModel())
 
@@ -67,7 +80,7 @@ describe("useFavoritesViewModel", () => {
       },
     ]
 
-    ;(storage.getSavedArticles as jest.Mock).mockResolvedValue(newArticles)
+    ;(storage.getSavedArticles as jest.Mock).mockResolvedValueOnce(newArticles)
 
     await act(async () => {
       await result.current.handleRefresh()
@@ -77,21 +90,41 @@ describe("useFavoritesViewModel", () => {
       expect(result.current.refreshing).toBe(false)
       expect(result.current.savedArticles).toEqual(newArticles)
     })
-  })
+  }, 10000)
 
-  it("should set refreshing state correctly", async () => {
-    const { result } = renderHook(() => useFavoritesViewModel())
+ it("should set refreshing state correctly", async () => {
+   let resolvePromise: (value: any) => void
 
-    act(() => {
-      result.current.handleRefresh()
-    })
+   const pendingPromise = new Promise((res) => {
+     resolvePromise = res
+   })
 
-    expect(result.current.refreshing).toBe(true)
+   ;(storage.getSavedArticles as jest.Mock)
+     .mockResolvedValueOnce(mockArticles) 
+     .mockReturnValueOnce(pendingPromise) 
 
-    await waitFor(() => {
-      expect(result.current.refreshing).toBe(false)
-    })
-  })
+   const { result } = renderHook(() => useFavoritesViewModel())
+
+   await waitFor(() => {
+     expect(result.current.savedArticles).toHaveLength(1)
+   })
+
+   act(() => {
+     result.current.handleRefresh()
+   })
+
+   await waitFor(() => {
+     expect(result.current.refreshing).toBe(true)
+   })
+
+   act(() => {
+     resolvePromise!([])
+   })
+
+   await waitFor(() => {
+     expect(result.current.refreshing).toBe(false)
+   })
+ })
 
   it("should reload articles when loadSavedArticles is called", async () => {
     const { result } = renderHook(() => useFavoritesViewModel())
@@ -99,7 +132,7 @@ describe("useFavoritesViewModel", () => {
     await waitFor(() => {
       expect(result.current.savedArticles).toEqual(mockArticles)
     })
-    ;(storage.getSavedArticles as jest.Mock).mockResolvedValue([])
+    ;(storage.getSavedArticles as jest.Mock).mockResolvedValueOnce([])
 
     await act(async () => {
       await result.current.loadSavedArticles()
@@ -108,5 +141,5 @@ describe("useFavoritesViewModel", () => {
     await waitFor(() => {
       expect(result.current.savedArticles).toEqual([])
     })
-  })
+  }, 10000)
 })

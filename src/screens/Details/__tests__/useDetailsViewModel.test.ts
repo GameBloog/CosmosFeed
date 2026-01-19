@@ -4,11 +4,20 @@ import { useDetailsViewModel } from "../useDetailsViewModel"
 import * as storage from "../../../services/storage"
 import * as share from "../../../services/share"
 
+jest.mock("react-native", () => ({
+  Alert: {
+    alert: jest.fn(),
+  },
+  Linking: {
+    openURL: jest.fn(() => Promise.resolve(true)),
+    canOpenURL: jest.fn(() => Promise.resolve(true)),
+  },
+}))
+
 jest.mock("../../../services/storage")
 jest.mock("../../../services/share")
 
 const mockAlert = jest.spyOn(Alert, "alert")
-const mockLinkingOpenURL = jest.spyOn(Linking, "openURL")
 
 describe("useDetailsViewModel", () => {
   const mockParams = {
@@ -27,7 +36,6 @@ describe("useDetailsViewModel", () => {
     ;(storage.saveArticle as jest.Mock).mockResolvedValue(undefined)
     ;(storage.removeArticle as jest.Mock).mockResolvedValue(undefined)
     ;(share.shareArticle as jest.Mock).mockResolvedValue(undefined)
-    mockLinkingOpenURL.mockResolvedValue(true)
   })
 
   it("should initialize with isSaved as false", async () => {
@@ -141,13 +149,15 @@ describe("useDetailsViewModel", () => {
   })
 
   it("should open URL when handleReadMore is called", () => {
+    const spy = jest.spyOn(Linking, "openURL")
+
     const { result } = renderHook(() => useDetailsViewModel(mockParams))
 
     act(() => {
       result.current.handleReadMore()
     })
 
-    expect(mockLinkingOpenURL).toHaveBeenCalledWith(mockParams.url)
+    expect(spy).toHaveBeenCalledWith(mockParams.url)
   })
 
   it("should format date correctly", () => {

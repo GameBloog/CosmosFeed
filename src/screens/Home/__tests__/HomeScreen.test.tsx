@@ -11,7 +11,6 @@ import * as storage from "../../../services/storage"
 import { Article } from "../../../services/api"
 import { act } from "@testing-library/react-native"
 
-// Mock da variável de ambiente
 jest.mock("../../../env", () => ({
   EXPO_PUBLIC_API_BASE_URL: "https://api.spaceflightnewsapi.net/v4",
 }))
