@@ -15,12 +15,6 @@ export default function FavoritesScreen() {
   const [savedArticles, setSavedArticles] = useState<Article[]>([])
   const [refreshing, setRefreshing] = useState(false)
 
-  useFocusEffect(
-    useCallback(() => {
-      loadSavedArticles()
-    }, []),
-  )
-
   const loadSavedArticles = async () => {
     const articles = await getSavedArticles()
     setSavedArticles(articles)
@@ -51,6 +45,12 @@ export default function FavoritesScreen() {
         Save articles from the feed to read them later
       </Text>
     </View>
+  )
+  
+  useFocusEffect(
+    useCallback(() => {
+      loadSavedArticles()
+    }, []),
   )
 
   return (

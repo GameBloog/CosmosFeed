@@ -1,6 +1,11 @@
 import axios from "axios"
+import { EXPO_PUBLIC_API_BASE_URL } from "../env"
 
-const API_BASE_URL = "https://api.spaceflightnewsapi.net/v4"
+if (!EXPO_PUBLIC_API_BASE_URL) {
+  throw new Error("Missing EXPO_PUBLIC_API_BASE_URL")
+}
+
+const API_BASE_URL = EXPO_PUBLIC_API_BASE_URL
 
 export interface Article {
   id: number

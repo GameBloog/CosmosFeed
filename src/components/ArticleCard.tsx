@@ -27,16 +27,6 @@ export default function ArticleCard({
 }: ArticleCardProps) {
   const [isSaved, setIsSaved] = useState(false)
 
-  useEffect(() => {
-    checkIfSaved()
-  }, [])
-
-  useFocusEffect(
-    useCallback(() => {
-      checkIfSaved()
-    }, [article.id]),
-  )
-
   const checkIfSaved = async () => {
     const saved = await isArticleSaved(article.id)
     setIsSaved(saved)
@@ -69,6 +59,16 @@ export default function ArticleCard({
       Alert.alert("Error", "Failed to share article")
     }
   }
+
+  useEffect(() => {
+    checkIfSaved()
+  }, [])
+
+  useFocusEffect(
+    useCallback(() => {
+      checkIfSaved()
+    }, [article.id]),
+  )
 
   return (
     <TouchableOpacity

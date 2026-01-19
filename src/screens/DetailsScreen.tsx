@@ -21,10 +21,6 @@ export default function DetailsScreen({ route }: DetailsScreenProps) {
   const { id, title, summary, imageUrl, url, publishedAt } = route.params
   const [isSaved, setIsSaved] = useState(false)
 
-  useEffect(() => {
-    checkIfSaved()
-  }, [])
-
   const checkIfSaved = async () => {
     const saved = await isArticleSaved(id)
     setIsSaved(saved)
@@ -87,6 +83,10 @@ export default function DetailsScreen({ route }: DetailsScreenProps) {
       day: "numeric",
     })
   }
+
+  useEffect(() => {
+    checkIfSaved()
+  }, [])
 
   return (
     <ScrollView style={styles.container}>

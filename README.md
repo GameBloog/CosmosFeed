@@ -130,6 +130,7 @@ O design segue uma estética espacial minimalista com:
 
 ## 👨‍💻 Autor
 
+Pedro Gimenez
 Desenvolvido como parte de um desafio técnico para vaga de Desenvolvedor Mobile React Native.
 
 ## 📄 Licença

@@ -2,6 +2,9 @@
   "name": "cosmos-feed",
   "version": "1.0.0",
   "main": "index.ts",
+  "author": {
+    "name": "Pedro Gimenez"
+  },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",

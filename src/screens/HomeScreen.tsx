@@ -23,10 +23,6 @@ export default function HomeScreen() {
 
   const LIMIT = 20
 
-  useEffect(() => {
-    loadArticles()
-  }, [])
-
   const loadArticles = async (isRefresh = false) => {
     try {
       if (isRefresh) {
@@ -104,6 +100,10 @@ export default function HomeScreen() {
   if (error) {
     return <ErrorView message={error} onRetry={() => loadArticles()} />
   }
+
+  useEffect(() => {
+    loadArticles()
+  }, [])
 
   return (
     <View style={styles.container}>

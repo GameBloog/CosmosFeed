@@ -1,5 +1,5 @@
 import "react-native-gesture-handler"
-import { NavigationContainer } from "@react-navigation/native"
+import { NavigationContainer, ParamListBase } from "@react-navigation/native"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { StatusBar } from "expo-status-bar"
@@ -10,7 +10,7 @@ import DetailsScreen from "./src/screens/DetailsScreen"
 import { theme } from "./src/styles/theme"
 
 export type RootStackParamList = {
-  HomeTabs: undefined
+  HomeTabs: ParamListBase
   Details: {
     id: number
     title: string
@@ -22,8 +22,8 @@ export type RootStackParamList = {
 }
 
 export type TabParamList = {
-  Feed: undefined
-  Favorites: undefined
+  Feed: ParamListBase
+  Favorites: ParamListBase
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
