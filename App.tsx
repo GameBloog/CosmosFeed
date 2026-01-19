@@ -4,9 +4,9 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { StatusBar } from "expo-status-bar"
 import { Text } from "react-native"
-import HomeScreen from "./src/screens/HomeScreen"
-import FavoritesScreen from "./src/screens/FavoritesScreen"
-import DetailsScreen from "./src/screens/DetailsScreen"
+import HomeScreen from "./src/screens/Home/HomeScreen"
+import FavoritesScreen from "./src/screens/Favorites/FavoritesScreen"
+import DetailsScreen from "./src/screens/Details/DetailsScreen"
 import { theme } from "./src/styles/theme"
 
 export type RootStackParamList = {

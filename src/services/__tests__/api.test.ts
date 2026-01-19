@@ -1,5 +1,11 @@
+// src/services/__tests__/api.test.ts
 import axios from "axios"
 import { fetchArticles } from "../api"
+
+// Mock da variável de ambiente ANTES de importar o módulo
+jest.mock("../../env", () => ({
+  EXPO_PUBLIC_API_BASE_URL: "https://api.spaceflightnewsapi.net/v4",
+}))
 
 jest.mock("axios")
 const mockedAxios = axios as jest.Mocked<typeof axios>
